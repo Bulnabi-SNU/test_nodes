@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'test_01 = test_nodes.test_01_takeoff_and_land:main',
+            'test_02 = test_nodes.test_02_mc_square:main',
         ],
     },
 )
