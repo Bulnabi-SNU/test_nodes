@@ -15,11 +15,12 @@ setup(
     zip_safe=True,
     maintainer='juyong',
     maintainer_email='juyong3393@snu.ac.kr',
-    description='TODO: Package description',
+    description='test nodes',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'test_01 = test_nodes.test_01_takeoff_and_land:main',
         ],
     },
 )
