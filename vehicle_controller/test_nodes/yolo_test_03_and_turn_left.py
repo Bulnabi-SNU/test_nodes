@@ -190,15 +190,46 @@ class VehicleController(Node):
                     param2=6.0  # offboard
                 )
                 self.phase = 0.3
-        if self.phase == 0.3:
+
+        elif self.phase == 0.3:
             self.publish_gimbal_control(pitch=-math.pi/6, yaw=self.yaw)
-            self.current_goal = np.array([(10.0)*math.cos(self.yaw), (10.0)*math.sin(self.yaw), -5.0])
+            self.current_goal = np.array([10.0 * math.cos(self.yaw), 10.0 * math.sin(self.yaw), -5.0])
             self.phase = 0.5
+            self.ladder_detect_attempts = 0  # Initialize detection attempts
+            self.ladder_detected = 0  # Initialize successful detections
+            self.first_ladder_detected = False  # Initialize the first detection flag
+            
         elif self.phase == 0.5:
             self.publish_trajectory_setpoint(position_sp=self.current_goal)
-            if self.obstacle_label == 'ladder':
-                self.phase = 1
-                self.time_checker = 0
+
+            # Check for the first detection of ladder-truck
+            if not self.first_ladder_detected and self.obstacle_label == 'ladder-truck':
+                self.first_ladder_detected = True
+                print('First detection of ladder-truck.')
+
+            # Start counting attempts only after the first detection
+            if self.first_ladder_detected:
+                if self.ladder_detect_attempts < 5:
+                    self.ladder_detect_attempts += 1
+
+                    if self.obstacle_label == 'ladder-truck':
+                        print(f'Detected obstacle: {self.obstacle_label}')
+                        self.ladder_detected += 1
+                    else:
+                        print(f'Detected obstacle: {self.obstacle_label}')
+
+                if self.ladder_detect_attempts >= 5:
+                    if self.ladder_detected >= 3:
+                        print('Ladder-truck detected. Changing phase to 1.')
+                        self.phase = 1
+                        self.time_checker = 0
+                    else:
+                        print('Ladder-truck not sufficiently detected. Resetting attempts.')
+                        self.ladder_detect_attempts = 0
+                        self.ladder_detected = 0
+                        self.first_ladder_detected = False
+
+
         elif self.phase == 1:
             self.publish_trajectory_setpoint(position_sp=self.pos)
             print(f'Direction of obstacle: {self.obstacle_orientation}')

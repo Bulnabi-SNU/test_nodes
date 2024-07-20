@@ -38,7 +38,6 @@ class YoloDetector(Node):
         
         # create publishers
         self.publisher_obstacle = self.create_publisher(YoloObstacle, '/yolo_obstacle', qos_profile)
-        #self.publisher_target = self.create_publisher(YoloTarget, '/yolo_target', qos_profile)
         # create subscribe
         self.subscriber_phase = self.create_subscription(VehiclePhase, '/vehicle_phase', self.phase_callback, qos_profile)
         # create phase
@@ -105,7 +104,7 @@ class YoloDetector(Node):
 
 
         # display frame
-        #cv2.imshow('YOLOv5 Detection', frame)
+        cv2.imshow('YOLOv5 Detection', frame)
         
 
         '''
