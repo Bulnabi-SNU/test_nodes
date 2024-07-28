@@ -30,6 +30,7 @@ setup(
             'mc_test_02 = test_nodes.mc_test_02_mc_square:main',
             'mc_test_03 = test_nodes.mc_test_03_slow_flight:main',
             'mc_test_04 = test_nodes.mc_test_04_mc_square_slow:main',
+            'mc_test_05 = test_nodes.mc_test_05_slow_square_gps:main',
             'yolo_test_01 = test_nodes.yolo_test_01:main',
             'yolo_test_02 = test_nodes.yolo_test_02_go_straight:main',
             'yolo_test_03 = test_nodes.yolo_test_03_and_turn_left:main',
