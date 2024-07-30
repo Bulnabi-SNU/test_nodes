@@ -33,8 +33,8 @@ def generate_launch_description():
                 cmd=[
                     "ros2", "run", "apriltag_ros", "apriltag_node",
                     "--ros-args",
-                    "-r", "image_rect:=/image_rect",
-                    "-r", "camera_info:=/camera/camera_info",
+                    "-r", "image_rect:=/image_rect_color",
+                    "-r", "camera_info:=/camera_info",
                     "--params-file", apriltag_params_file
                 ],
                 output="screen"

@@ -16,7 +16,7 @@ class Filter(Node):
         )
         self.publisher = self.create_publisher(Float32MultiArray, 'bezier_waypoint', 10)
         self.raw_values = deque([], maxlen=30)  # 최대 크기를 지정하여 자동으로 관리
-        self.raw_values_2 = deque([], maxlen=100)
+        self.raw_values_2 = deque([], maxlen=30)
 
     def tag_callback(self, msg):
         tag_world = np.array(msg.data)

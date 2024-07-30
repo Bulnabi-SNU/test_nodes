@@ -201,13 +201,9 @@ class BezierControl(Node):
         self.vf = np.zeros(3)
  
     def vehicle_status_callback(self, msg):
-        # TODO: handle NED->ENU transformation
-        print("NAV_STATUS: ", msg.nav_state)
-        print("  - offboard status: ", VehicleStatus.NAVIGATION_STATE_OFFBOARD)
         self.nav_state = msg.nav_state
 
     def phase_check_callback(self,msg):
-        print("Autolanding start")
         self.phase_check = msg.data
 
     def point_command_callback(self, msg):
@@ -247,8 +243,9 @@ class BezierControl(Node):
             self.vehicle_velocity[2] = msg.vz
 
     def land(self):
-            self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
-            self.loop_on = 0    
+        self.get_logger().info("land")
+        self.publish_vehicle_command(VehicleCommand.VEHICLE_CMD_NAV_LAND)
+        self.loop_on = 0    
         
 
     def publish_vehicle_command(self, command, **kwargs):
@@ -270,15 +267,22 @@ class BezierControl(Node):
         msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
         self.publisher_vehicle_command.publish(msg)
 
+    def publish_offboard_control_mode(self, **kwargs):
+        msg = OffboardControlMode()
+        msg.position = kwargs.get("position", False)
+        msg.velocity = kwargs.get("velocity", False)
+        msg.acceleration = kwargs.get("acceleration", False)
+        msg.attitude = kwargs.get("attitude", False)
+        msg.body_rate = kwargs.get("body_rate", False)
+        msg.thrust_and_torque = kwargs.get("thrust_and_torque", False)
+        msg.direct_actuator = kwargs.get("direct_actuator", False)
+        msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+        self.publisher_offboard_mode.publish(msg)
+    
     def cmdloop_callback(self):
         if self.phase_check  and self.detect and self.loop_on:
             # Publish offboard control modes
-            offboard_msg = OffboardControlMode()
-            offboard_msg.timestamp = int(Clock().now().nanoseconds / 1000)
-            offboard_msg.position=True
-            offboard_msg.velocity=True
-            offboard_msg.acceleration=False
-            self.publisher_offboard_mode.publish(offboard_msg)
+            self.publish_offboard_control_mode(position=True)
             if self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD:
 
                 trajectory_msg = TrajectorySetpoint()
@@ -293,6 +297,7 @@ class BezierControl(Node):
                     trajectory_msg.velocity[2] = np.nan #self.vz[self.delta_t]
                     trajectory_msg.yaw = np.nan
                     self.delta_t += 1
+                    self.publisher_trajectory.publish(trajectory_msg)
                 
                 elif np.linalg.norm(self.vehicle_position[2]-self.xf[2]) < 0.3:
                     self.land()
@@ -300,7 +305,6 @@ class BezierControl(Node):
                 if self.trigger == 1:  # delta_t reset 
                     self.delta_t = 0
                     self.trigger = 0
-                self.publisher_trajectory.publish(trajectory_msg)
 
         
 

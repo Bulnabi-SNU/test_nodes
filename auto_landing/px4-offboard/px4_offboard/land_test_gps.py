@@ -39,7 +39,7 @@ class VehicleController(Node):
         """
         1. Constants
         """
-        self.mc_acceptance_radius = 0.3
+        self.mc_acceptance_radius = 0.2
         self.acceptance_heading_angle = np.radians(0.5)
 
         """
@@ -141,15 +141,17 @@ class VehicleController(Node):
                 self.phase = 0.5
 
         elif self.phase == 0.5:
-            self.publish_trajectory_setpoint(position_sp=self.WP[1])
-            self.current_goal = self.WP[1]
+            self.arb_point = [3.0, 0.0, -5.0]
+            self.go_slow(self.arb_point)
+            self.current_goal = self.arb_point
             distance = np.linalg.norm(self.pos - self.current_goal)
             if distance < self.mc_acceptance_radius:
                 self.phase = 1
         
         elif self.phase == 1:
-            self.publish_trajectory_setpoint(position_sp = [0,0,-0.5])
-            self.current_goal = [0,0,-0.5]
+            self.land_point = [0.0, 0.0, -2.0]
+            self.go_slow(self.land_point)
+            self.current_goal = self.land_point
             distance = np.linalg.norm(self.pos - self.current_goal)
             if distance < self.mc_acceptance_radius:
                 self.phase = 2
@@ -157,6 +159,15 @@ class VehicleController(Node):
             self.land()
         print(self.phase)
 
+
+    def go_slow(self, xf):
+        if np.linalg.norm(xf - self.pos) > 0.05:
+            self.vec = (xf - self.pos)/np.linalg.norm(xf - self.pos)*0.05
+            self.publish_trajectory_setpoint(position_sp=xf + self.vec)
+        else:
+            self.vec = xf - self.pos
+            self.publish_trajectory_setpoint(position_sp=xf)
+        
 
 
     """
